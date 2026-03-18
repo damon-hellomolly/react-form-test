@@ -314,7 +314,7 @@ export default function DeveloperTest() {
               <li className="flex items-start gap-2">
                 <span className="text-primary">1.</span>
                 <span>
-                  Create a new Next.js project or use the provided starter
+                  Create a new branch from the main branch and name it according to your name or github username.
                 </span>
               </li>
               <li className="flex items-start gap-2">
