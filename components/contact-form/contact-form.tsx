@@ -29,11 +29,13 @@ import {
 export type ContactFormProps = {
   formId?: string;
   hideSubmitButton?: boolean;
+  onSubmittingChange?: (isSubmitting: boolean) => void;
 };
 
 export default function ContactForm({
   formId = "contact-us-form",
   hideSubmitButton = false,
+  onSubmittingChange,
 }: ContactFormProps) {
   const [formData, setFormData] = useState<ContactFormData>(INITIAL_FORM_DATA);
   const [formErrors, setFormErrors] = useState<ContactFormErrors>({});
@@ -74,6 +76,10 @@ export default function ContactForm({
 
     saveDraftToSessionStorage(formData);
   }, [formData, isDraftHydrated]);
+
+  useEffect(() => {
+    onSubmittingChange?.(isSubmitting);
+  }, [isSubmitting, onSubmittingChange]);
 
   function handleFieldChange<K extends keyof ContactFormData>(
     key: K,
@@ -188,24 +194,41 @@ export default function ContactForm({
   }
 
   return (
-    <form id={formId} noValidate className="space-y-4" onSubmit={handleSubmit}>
+    <form
+      id={formId}
+      noValidate
+      className="space-y-3 sm:space-y-4"
+      onSubmit={handleSubmit}
+      aria-busy={isSubmitting}
+    >
       <div className="grid gap-2 md:grid-cols-[120px_minmax(0,1fr)] md:items-start">
         <label htmlFor="name" className="text-sm md:pt-2">
           Name
         </label>
-        <div className="space-y-1">
+        <div className="min-w-0 space-y-1">
           <input
             id="name"
             name="name"
             type="text"
             required
+            disabled={isSubmitting}
+            aria-invalid={formErrors.name ? true : undefined}
+            aria-describedby={formErrors.name ? "name-error" : undefined}
+            aria-errormessage={formErrors.name ? "name-error" : undefined}
             placeholder="Enter your name"
             value={formData.name}
             onChange={(event) => handleFieldChange("name", event.target.value)}
-            className="w-full rounded border px-3 py-2"
+            className="w-full rounded border px-3 py-2 text-sm"
           />
           {formErrors.name ? (
-            <p className="text-sm text-red-600">{formErrors.name}</p>
+            <p
+              id="name-error"
+              role="alert"
+              aria-live="assertive"
+              className="text-sm leading-5 break-words text-red-600"
+            >
+              {formErrors.name}
+            </p>
           ) : null}
         </div>
       </div>
@@ -214,19 +237,30 @@ export default function ContactForm({
         <label htmlFor="email" className="text-sm md:pt-2">
           Email
         </label>
-        <div className="space-y-1">
+        <div className="min-w-0 space-y-1">
           <input
             id="email"
             name="email"
             type="email"
             required
+            disabled={isSubmitting}
+            aria-invalid={formErrors.email ? true : undefined}
+            aria-describedby={formErrors.email ? "email-error" : undefined}
+            aria-errormessage={formErrors.email ? "email-error" : undefined}
             placeholder="Enter your email"
             value={formData.email}
             onChange={(event) => handleFieldChange("email", event.target.value)}
-            className="w-full rounded border px-3 py-2"
+            className="w-full rounded border px-3 py-2 text-sm"
           />
           {formErrors.email ? (
-            <p className="text-sm text-red-600">{formErrors.email}</p>
+            <p
+              id="email-error"
+              role="alert"
+              aria-live="assertive"
+              className="text-sm leading-5 break-words text-red-600"
+            >
+              {formErrors.email}
+            </p>
           ) : null}
         </div>
       </div>
@@ -235,19 +269,32 @@ export default function ContactForm({
         <label htmlFor="subject" className="text-sm md:pt-2">
           Subject
         </label>
-        <div className="space-y-1">
+        <div className="min-w-0 space-y-1">
           <input
             id="subject"
             name="subject"
             type="text"
             required
+            disabled={isSubmitting}
+            aria-invalid={formErrors.subject ? true : undefined}
+            aria-describedby={formErrors.subject ? "subject-error" : undefined}
+            aria-errormessage={formErrors.subject ? "subject-error" : undefined}
             placeholder="Enter a subject"
             value={formData.subject}
-            onChange={(event) => handleFieldChange("subject", event.target.value)}
-            className="w-full rounded border px-3 py-2"
+            onChange={(event) =>
+              handleFieldChange("subject", event.target.value)
+            }
+            className="w-full rounded border px-3 py-2 text-sm"
           />
           {formErrors.subject ? (
-            <p className="text-sm text-red-600">{formErrors.subject}</p>
+            <p
+              id="subject-error"
+              role="alert"
+              aria-live="assertive"
+              className="text-sm leading-5 break-words text-red-600"
+            >
+              {formErrors.subject}
+            </p>
           ) : null}
         </div>
       </div>
@@ -256,19 +303,32 @@ export default function ContactForm({
         <label htmlFor="message" className="text-sm md:pt-2">
           Message
         </label>
-        <div className="space-y-1">
+        <div className="min-w-0 space-y-1">
           <textarea
             id="message"
             name="message"
             rows={3}
             required
+            disabled={isSubmitting}
+            aria-invalid={formErrors.message ? true : undefined}
+            aria-describedby={formErrors.message ? "message-error" : undefined}
+            aria-errormessage={formErrors.message ? "message-error" : undefined}
             placeholder="Enter your message"
             value={formData.message}
-            onChange={(event) => handleFieldChange("message", event.target.value)}
-            className="w-full rounded border px-3 py-2"
+            onChange={(event) =>
+              handleFieldChange("message", event.target.value)
+            }
+            className="w-full rounded border px-3 py-2 text-sm"
           />
           {formErrors.message ? (
-            <p className="text-sm text-red-600">{formErrors.message}</p>
+            <p
+              id="message-error"
+              role="alert"
+              aria-live="assertive"
+              className="text-sm leading-5 break-words text-red-600"
+            >
+              {formErrors.message}
+            </p>
           ) : null}
         </div>
       </div>
@@ -277,48 +337,60 @@ export default function ContactForm({
         <label htmlFor="attachments" className="text-sm md:pt-2">
           Attachments
         </label>
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
           <input
             id="attachments"
             name="attachments"
             type="file"
             multiple
+            disabled={isSubmitting}
+            aria-invalid={fileUploadError ? true : undefined}
+            aria-describedby={fileUploadError ? "attachments-error" : undefined}
+            aria-errormessage={
+              fileUploadError ? "attachments-error" : undefined
+            }
             onChange={handleFilesChange}
-            className="w-full rounded border px-3 py-2 text-sm file:mr-3 file:rounded file:border-0 file:bg-gray-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200"
+            className="w-full rounded border px-4 py-2 text-sm text-transparent file:text-sm file:font-medium file:text-gray-700 hover:bg-gray-200"
           />
-
           <p className="text-sm text-gray-600">
             Total size: {formatFileSize(totalFileSize)} /{" "}
             {formatFileSize(MAX_TOTAL_SIZE)}
           </p>
 
           {fileUploadError ? (
-            <p className="text-sm text-red-600">{fileUploadError}</p>
+            <p
+              id="attachments-error"
+              role="alert"
+              aria-live="assertive"
+              className="text-sm leading-5 break-words text-red-600"
+            >
+              {fileUploadError}
+            </p>
           ) : null}
 
-          {attachedFiles.length === 0 ? (
-            <p className="text-sm text-gray-600">No files selected.</p>
-          ) : (
+          {attachedFiles.length > 0 ? (
             <ul className="space-y-1">
               {attachedFiles.map((attachedFile) => (
                 <li
                   key={attachedFile.id}
-                  className="flex items-center justify-between rounded border px-3 py-2"
+                  className="flex flex-col gap-2 rounded border px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <span>
+                  <span className="min-w-0 break-all text-sm">
                     {attachedFile.name} ({formatFileSize(attachedFile.size)})
                   </span>
                   <button
                     type="button"
+                    disabled={isSubmitting}
                     onClick={() => handleRemoveFile(attachedFile.id)}
-                    className="rounded border px-2 py-1 text-sm"
+                    aria-label={`Remove ${attachedFile.name}`}
+                    className="self-start rounded border px-2 py-1 text-sm disabled:cursor-not-allowed disabled:opacity-60 sm:self-auto"
                   >
                     Remove
                   </button>
                 </li>
               ))}
             </ul>
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -326,36 +398,45 @@ export default function ContactForm({
         <label htmlFor="captcha" className="text-sm md:pt-2">
           CAPTCHA
         </label>
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <p className="rounded border px-3 py-2 text-sm">
-              Solve: {captchaChallenge ? captchaChallenge.question : "Loading..."}
-            </p>
+        <div className="min-w-0 space-y-2">
+          <div className="flex items-start gap-2">
+            <input
+              id="captcha"
+              name="captcha"
+              type="text"
+              inputMode="numeric"
+              disabled={isSubmitting}
+              aria-invalid={captchaError ? true : undefined}
+              aria-describedby={captchaError ? "captcha-error" : undefined}
+              aria-errormessage={captchaError ? "captcha-error" : undefined}
+              placeholder="Enter answer"
+              value={captchaInput}
+              onChange={(event) => {
+                setCaptchaInput(event.target.value);
+                if (captchaError) {
+                  setCaptchaError(null);
+                }
+              }}
+              className="min-w-0 flex-1 rounded border px-3 py-2 text-sm"
+            />
             <button
               type="button"
+              disabled={isSubmitting}
               onClick={handleCaptchaRefresh}
-              className="rounded border px-2 py-1 text-sm"
+              className="shrink-0 rounded border px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60 hover:bg-gray-200 hover:cursor-pointer"
             >
-              Refresh
+              Solve: {captchaChallenge ? captchaChallenge.question : "Loading..."}
             </button>
           </div>
-          <input
-            id="captcha"
-            name="captcha"
-            type="text"
-            inputMode="numeric"
-            placeholder="Enter answer"
-            value={captchaInput}
-            onChange={(event) => {
-              setCaptchaInput(event.target.value);
-              if (captchaError) {
-                setCaptchaError(null);
-              }
-            }}
-            className="w-full rounded border px-3 py-2"
-          />
           {captchaError ? (
-            <p className="text-sm text-red-600">{captchaError}</p>
+            <p
+              id="captcha-error"
+              role="alert"
+              aria-live="assertive"
+              className="text-sm leading-5 break-words text-red-600"
+            >
+              {captchaError}
+            </p>
           ) : null}
         </div>
       </div>
@@ -366,7 +447,7 @@ export default function ContactForm({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-fit rounded border px-3 py-2 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded border px-3 py-2 disabled:cursor-not-allowed disabled:opacity-60 md:w-fit"
           >
             {isSubmitting ? "Submitting..." : "Submit"}
           </button>
