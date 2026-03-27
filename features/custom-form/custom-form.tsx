@@ -23,9 +23,10 @@ export default function CustomerForm() {
   const [formData, setFormData] = useState<ContactFormData>(INITIAL_FORM_DATA);
   const [formErrors, setFormErrors] = useState<ContactFormErrors>({});
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
-  const [fileUploadError] = useState<FileUploadError>(null);
+  const [fileUploadError, setFileUploadError] = useState<FileUploadError>(null);
 
   const totalFileSize = getTotalFileSize(attachedFiles);
+  const fileSizeLimitError = `Total file size must not exceed ${formatFileSize(MAX_TOTAL_SIZE)}.`;
 
   function handleFieldChange<K extends keyof ContactFormData>(
     key: K,
@@ -45,13 +46,25 @@ export default function CustomerForm() {
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    // prevent the default form submission behavior
     event.preventDefault();
-    const errors = validateContactForm(formData);
-    setFormErrors(errors);
 
-    // submit  here.
+    // validate the form data
+    const errors = validateContactForm(formData);
+    // validate the file upload
+    const nextFileUploadError =
+      totalFileSize > MAX_TOTAL_SIZE ? fileSizeLimitError : null;
+
+    // set errors, show errors
+    setFormErrors(errors);
+    setFileUploadError(nextFileUploadError);
+
+    if (Object.keys(errors).length > 0 || nextFileUploadError) {
+      return;
+    }
+    // submit here.
   }
-  
+
   function handleFilesChange(event: ChangeEvent<HTMLInputElement>) {
     const selected = event.target.files;
     if (!selected || selected.length === 0) {
@@ -59,7 +72,17 @@ export default function CustomerForm() {
     }
 
     const nextFiles = createAttachedFiles(selected);
+    const nextFilesTotalSize = getTotalFileSize(nextFiles);
+    const nextCombinedTotalSize = totalFileSize + nextFilesTotalSize;
+
+    if (nextCombinedTotalSize > MAX_TOTAL_SIZE) {
+      setFileUploadError(fileSizeLimitError);
+      event.target.value = "";
+      return;
+    }
+
     setAttachedFiles((prev) => [...prev, ...nextFiles]);
+    setFileUploadError(null);
 
     // let onChange event handler to be called again
     // reset the file input, allow user to upload the same files again.
@@ -67,7 +90,16 @@ export default function CustomerForm() {
   }
 
   function handleRemoveFile(id: string) {
-    setAttachedFiles((prev) => prev.filter((file) => file.id !== id));
+    setAttachedFiles((prev) => {
+      const nextAttachedFiles = prev.filter((file) => file.id !== id);
+      const nextTotalSize = getTotalFileSize(nextAttachedFiles);
+
+      if (nextTotalSize <= MAX_TOTAL_SIZE) {
+        setFileUploadError(null);
+      }
+
+      return nextAttachedFiles;
+    });
   }
 
   return (
