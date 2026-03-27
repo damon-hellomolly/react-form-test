@@ -1,9 +1,10 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  CaptchaChallenge,
   createCaptchaChallenge,
   validateCaptchaInput,
 } from "@/features/contact-form/captcha";
@@ -32,9 +33,7 @@ export default function ContactForm() {
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const [fileUploadError, setFileUploadError] = useState<FileUploadError>(null);
 
-  const [captchaChallenge, setCaptchaChallenge] = useState(() =>
-    createCaptchaChallenge(),
-  );
+  const [captchaChallenge, setCaptchaChallenge] = useState<CaptchaChallenge | null>(null);
   const [captchaInput, setCaptchaInput] = useState("");
   const [captchaError, setCaptchaError] = useState<string | null>(null);
 
@@ -42,6 +41,11 @@ export default function ContactForm() {
 
   const totalFileSize = getTotalFileSize(attachedFiles);
   const fileSizeLimitError = `Total file size must not exceed ${formatFileSize(MAX_TOTAL_SIZE)}.`;
+
+  // Load a new CAPTCHA challenge when the component mounts
+  useEffect(() => {
+    setCaptchaChallenge(createCaptchaChallenge());
+  }, []);
 
   function handleFieldChange<K extends keyof ContactFormData>(
     key: K,
@@ -67,6 +71,11 @@ export default function ContactForm() {
       return;
     }
 
+    if (!captchaChallenge) {
+      setCaptchaError("CAPTCHA is loading. Please try again.");
+      return;
+    }
+
     const errors = validateContactForm(formData);
     const nextFileUploadError =
       totalFileSize > MAX_TOTAL_SIZE ? fileSizeLimitError : null;
@@ -89,11 +98,12 @@ export default function ContactForm() {
 
     try {
       setIsSubmitting(true);
-      await submitContactFormSimulation({
-        formData,
-        attachedFiles,
-      });
-      toast.success("Message successfully delivered");
+      // Simulate a fetch API call with a 2-second delay
+      await submitContactFormSimulation({ formData, attachedFiles });
+      // On success, display a popup/toast message: "Message successfully delivered"
+      toast.success(`Message successfully delivered`);
+      console.log(sessionStorage.getItem("contact-form:last-submission"))
+      
       setCaptchaChallenge(createCaptchaChallenge());
       setCaptchaInput("");
       setCaptchaError(null);
@@ -288,7 +298,7 @@ export default function ContactForm() {
             </label>
             <div className="flex items-center gap-2">
               <p className="rounded border px-3 py-2 text-sm">
-                Solve: {captchaChallenge.question}
+                Solve: {captchaChallenge ? captchaChallenge.question : "Loading..."}
               </p>
               <button
                 type="button"

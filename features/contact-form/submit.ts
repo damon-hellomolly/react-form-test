@@ -34,6 +34,7 @@ function createSubmissionResult(
 export async function submitContactFormSimulation(
   payload: SubmitContactFormPayload,
 ): Promise<SubmissionResult> {
+  // Simulate a fetch API call with a 2-second delay
   await new Promise<void>((resolve) => setTimeout(resolve, SUBMISSION_DELAY_MS));
 
   const result = createSubmissionResult(payload);
