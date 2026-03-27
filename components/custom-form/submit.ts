@@ -2,7 +2,7 @@ import {
   AttachedFile,
   ContactFormData,
   SubmissionResult,
-} from "@/features/contact-form/types";
+} from "@/components/custom-form/types";
 
 const SUBMISSION_DELAY_MS = 2000;
 const LAST_SUBMISSION_SESSION_KEY = "contact-form:last-submission";
@@ -34,7 +34,6 @@ function createSubmissionResult(
 export async function submitContactFormSimulation(
   payload: SubmitContactFormPayload,
 ): Promise<SubmissionResult> {
-  // Simulate a fetch API call with a 2-second delay
   await new Promise<void>((resolve) => setTimeout(resolve, SUBMISSION_DELAY_MS));
 
   const result = createSubmissionResult(payload);

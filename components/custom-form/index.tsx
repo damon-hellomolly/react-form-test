@@ -7,42 +7,38 @@ import {
   CaptchaChallenge,
   createCaptchaChallenge,
   validateCaptchaInput,
-} from "@/features/contact-form/captcha";
+} from "@/components/custom-form/captcha";
 import {
   createAttachedFiles,
   formatFileSize,
   getTotalFileSize,
   MAX_TOTAL_SIZE,
-} from "@/features/contact-form/file-upload";
+} from "@/components/custom-form/file-upload";
 import {
   AttachedFile,
   ContactFormData,
   ContactFormErrors,
   FileUploadError,
-} from "@/features/contact-form/types";
+} from "@/components/custom-form/types";
 import {
   INITIAL_FORM_DATA,
   validateContactForm,
-} from "@/features/contact-form/validation";
-import { submitContactFormSimulation } from "@/features/contact-form/submit";
+} from "@/components/custom-form/validation";
+import { submitContactFormSimulation } from "@/components/custom-form/submit";
 
-export default function ContactForm() {
+export default function CustomerForm() {
   const [formData, setFormData] = useState<ContactFormData>(INITIAL_FORM_DATA);
   const [formErrors, setFormErrors] = useState<ContactFormErrors>({});
-
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const [fileUploadError, setFileUploadError] = useState<FileUploadError>(null);
-
   const [captchaChallenge, setCaptchaChallenge] = useState<CaptchaChallenge | null>(null);
   const [captchaInput, setCaptchaInput] = useState("");
   const [captchaError, setCaptchaError] = useState<string | null>(null);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const totalFileSize = getTotalFileSize(attachedFiles);
   const fileSizeLimitError = `Total file size must not exceed ${formatFileSize(MAX_TOTAL_SIZE)}.`;
 
-  // Load a new CAPTCHA challenge when the component mounts
   useEffect(() => {
     setCaptchaChallenge(createCaptchaChallenge());
   }, []);
@@ -98,12 +94,8 @@ export default function ContactForm() {
 
     try {
       setIsSubmitting(true);
-      // Simulate a fetch API call with a 2-second delay
       await submitContactFormSimulation({ formData, attachedFiles });
-      // On success, display a popup/toast message: "Message successfully delivered"
-      toast.success(`Message successfully delivered`);
-      console.log(sessionStorage.getItem("contact-form:last-submission"))
-      
+      toast.success("Message successfully delivered");
       setCaptchaChallenge(createCaptchaChallenge());
       setCaptchaInput("");
       setCaptchaError(null);
@@ -157,7 +149,7 @@ export default function ContactForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Contact Form</CardTitle>
+        <CardTitle>Customer Form</CardTitle>
       </CardHeader>
       <CardContent>
         <form noValidate className="space-y-4" onSubmit={handleSubmit}>
