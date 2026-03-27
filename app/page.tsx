@@ -11,7 +11,7 @@ import {
   Send,
 } from "lucide-react";
 
-//import CustomerForm from '@/components/custom-form'
+import CustomerForm from "@/components/custom-form";
 export default function DeveloperTest() {
   return (
     <div className="min-h-screen bg-linear-to-br from-primary/5 via-background to-accent/5">
@@ -52,6 +52,8 @@ export default function DeveloperTest() {
               storage persistence.
             </p>
           </div>
+
+          <CustomerForm />
 
           {/* Requirements */}
           <Card className="p-8 space-y-6">
@@ -200,7 +202,7 @@ export default function DeveloperTest() {
                     <span>
                       On success, display a popup/toast message:{" "}
                       <strong className="text-foreground">
-                        "Message successfully delivered"
+                        &quot;Message successfully delivered&quot;
                       </strong>
                     </span>
                   </li>
