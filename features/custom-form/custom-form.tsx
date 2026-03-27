@@ -3,6 +3,10 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  createCaptchaChallenge,
+  validateCaptchaInput,
+} from "@/features/custom-form/captcha";
+import {
   createAttachedFiles,
   formatFileSize,
   getTotalFileSize,
@@ -22,8 +26,15 @@ import {
 export default function CustomerForm() {
   const [formData, setFormData] = useState<ContactFormData>(INITIAL_FORM_DATA);
   const [formErrors, setFormErrors] = useState<ContactFormErrors>({});
+
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const [fileUploadError, setFileUploadError] = useState<FileUploadError>(null);
+
+  const [captchaChallenge, setCaptchaChallenge] = useState(() =>
+    createCaptchaChallenge(),
+  );
+  const [captchaInput, setCaptchaInput] = useState("");
+  const [captchaError, setCaptchaError] = useState<string | null>(null);
 
   const totalFileSize = getTotalFileSize(attachedFiles);
   const fileSizeLimitError = `Total file size must not exceed ${formatFileSize(MAX_TOTAL_SIZE)}.`;
@@ -54,12 +65,22 @@ export default function CustomerForm() {
     // validate the file upload
     const nextFileUploadError =
       totalFileSize > MAX_TOTAL_SIZE ? fileSizeLimitError : null;
+    // validate the Captcha
+    const nextCaptchaError = validateCaptchaInput(
+      captchaInput,
+      captchaChallenge.answer,
+    );
 
     // set errors, show errors
     setFormErrors(errors);
     setFileUploadError(nextFileUploadError);
+    setCaptchaError(nextCaptchaError);
 
-    if (Object.keys(errors).length > 0 || nextFileUploadError) {
+    if (
+      Object.keys(errors).length > 0 ||
+      nextFileUploadError ||
+      nextCaptchaError
+    ) {
       return;
     }
     // submit here.
@@ -100,6 +121,12 @@ export default function CustomerForm() {
 
       return nextAttachedFiles;
     });
+  }
+
+  function handleCaptchaRefresh() {
+    setCaptchaChallenge(createCaptchaChallenge());
+    setCaptchaInput("");
+    setCaptchaError(null);
   }
 
   return (
@@ -238,6 +265,42 @@ export default function CustomerForm() {
                 ))}
               </ul>
             )}
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="captcha" className="text-sm">
+              CAPTCHA
+            </label>
+            <div className="flex items-center gap-2">
+              <p className="rounded border px-3 py-2 text-sm">
+                Solve: {captchaChallenge.question}
+              </p>
+              <button
+                type="button"
+                onClick={handleCaptchaRefresh}
+                className="rounded border px-2 py-1 text-sm"
+              >
+                Refresh
+              </button>
+            </div>
+            <input
+              id="captcha"
+              name="captcha"
+              type="text"
+              inputMode="numeric"
+              placeholder="Enter answer"
+              value={captchaInput}
+              onChange={(event) => {
+                setCaptchaInput(event.target.value);
+                if (captchaError) {
+                  setCaptchaError(null);
+                }
+              }}
+              className="w-full rounded border px-3 py-2"
+            />
+            {captchaError ? (
+              <p className="text-sm text-red-600">{captchaError}</p>
+            ) : null}
           </div>
 
           <button type="submit" className="rounded border px-3 py-2">
