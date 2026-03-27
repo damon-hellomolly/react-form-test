@@ -1,66 +1,31 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-// structure for the form data
-interface ContactFormData {
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-}
-
-// structure for the form errors
-type ContactFormErrors = Partial<Record<keyof ContactFormData, string>>;
-
-// initial form data
-const INITIAL_FORM_DATA: ContactFormData = {
-  name: "",
-  email: "",
-  subject: "",
-  message: "",
-};
-
-// validate the form data
-function validateContactForm(data: ContactFormData): ContactFormErrors {
-  const errors: ContactFormErrors = {};
-  const name = data.name.trim();
-  const email = data.email.trim();
-  const subject = data.subject.trim();
-  const message = data.message.trim();
-
-  if (!name) {
-    errors.name = "Name is required.";
-  } else if (name.length < 2) {
-    errors.name = "Name must be at least 2 characters.";
-  }
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email) {
-    errors.email = "Email is required.";
-  } else if (!emailRegex.test(email)) {
-    errors.email = "Email format is invalid.";
-  }
-
-  if (!subject) {
-    errors.subject = "Subject is required.";
-  } else if (subject.length < 5) {
-    errors.subject = "Subject must be at least 5 characters.";
-  }
-
-  if (!message) {
-    errors.message = "Message is required.";
-  } else if (message.length < 10) {
-    errors.message = "Message must be at least 10 characters.";
-  }
-
-  return errors;
-}
+import {
+  createAttachedFiles,
+  formatFileSize,
+  getTotalFileSize,
+  MAX_TOTAL_SIZE,
+} from "@/features/custom-form/file-upload";
+import {
+  AttachedFile,
+  ContactFormData,
+  ContactFormErrors,
+  FileUploadError,
+} from "@/features/custom-form/types";
+import {
+  INITIAL_FORM_DATA,
+  validateContactForm,
+} from "@/features/custom-form/validation";
 
 export default function CustomerForm() {
   const [formData, setFormData] = useState<ContactFormData>(INITIAL_FORM_DATA);
   const [formErrors, setFormErrors] = useState<ContactFormErrors>({});
+  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
+  const [fileUploadError] = useState<FileUploadError>(null);
+
+  const totalFileSize = getTotalFileSize(attachedFiles);
 
   function handleFieldChange<K extends keyof ContactFormData>(
     key: K,
@@ -85,6 +50,24 @@ export default function CustomerForm() {
     setFormErrors(errors);
 
     // submit  here.
+  }
+  
+  function handleFilesChange(event: ChangeEvent<HTMLInputElement>) {
+    const selected = event.target.files;
+    if (!selected || selected.length === 0) {
+      return;
+    }
+
+    const nextFiles = createAttachedFiles(selected);
+    setAttachedFiles((prev) => [...prev, ...nextFiles]);
+
+    // let onChange event handler to be called again
+    // reset the file input, allow user to upload the same files again.
+    event.target.value = "";
+  }
+
+  function handleRemoveFile(id: string) {
+    setAttachedFiles((prev) => prev.filter((file) => file.id !== id));
   }
 
   return (
@@ -178,8 +161,55 @@ export default function CustomerForm() {
             ) : null}
           </div>
 
+          <div className="space-y-2">
+            <label htmlFor="attachments" className="text-sm">
+              Attachments
+            </label>
+            <input
+              id="attachments"
+              name="attachments"
+              type="file"
+              multiple
+              onChange={handleFilesChange}
+              className="w-full rounded border px-3 py-2 text-sm file:mr-3 file:rounded file:border-0 file:bg-gray-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200"
+            />
+
+            <p className="text-sm text-gray-600">
+              Total size: {formatFileSize(totalFileSize)} /{" "}
+              {formatFileSize(MAX_TOTAL_SIZE)}
+            </p>
+
+            {fileUploadError ? (
+              <p className="text-sm text-red-600">{fileUploadError}</p>
+            ) : null}
+
+            {attachedFiles.length === 0 ? (
+              <p className="text-sm text-gray-600">No files selected.</p>
+            ) : (
+              <ul className="space-y-1">
+                {attachedFiles.map((attachedFile) => (
+                  <li
+                    key={attachedFile.id}
+                    className="flex items-center justify-between rounded border px-3 py-2"
+                  >
+                    <span>
+                      {attachedFile.name} ({formatFileSize(attachedFile.size)})
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveFile(attachedFile.id)}
+                      className="rounded border px-2 py-1 text-sm"
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
           <button type="submit" className="rounded border px-3 py-2">
-            Validate Fields
+            Submit
           </button>
         </form>
       </CardContent>

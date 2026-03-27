@@ -11,7 +11,7 @@ import {
   Send,
 } from "lucide-react";
 
-import CustomerForm from "@/components/custom-form";
+import CustomerForm from "@/features/custom-form/custom-form";
 export default function DeveloperTest() {
   return (
     <div className="min-h-screen bg-linear-to-br from-primary/5 via-background to-accent/5">
