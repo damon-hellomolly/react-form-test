@@ -19,6 +19,7 @@ export interface SubmittedAttachment {
   type: string;
 }
 
+// Store the submission result(mock data) in session storage
 export interface SubmissionResult {
   id: string;
   submittedAt: string;

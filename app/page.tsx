@@ -45,6 +45,7 @@ export default function DeveloperTest() {
           </div>
         </div>
       ) : null}
+
       {/* Header */}
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-6">
@@ -347,7 +348,8 @@ export default function DeveloperTest() {
               <li className="flex items-start gap-2">
                 <span className="text-primary">1.</span>
                 <span>
-                  Create a new branch from the main branch and name it according to your name or github username.
+                  Create a new branch from the main branch and name it according
+                  to your name or github username.
                 </span>
               </li>
               <li className="flex items-start gap-2">

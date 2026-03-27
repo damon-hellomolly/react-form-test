@@ -25,6 +25,11 @@ import {
   validateContactForm,
 } from "@/components/custom-form/validation";
 import { submitContactFormSimulation } from "@/components/custom-form/submit";
+import {
+  clearDraftFromSessionStorage,
+  restoreDraftFromSessionStorage,
+  saveDraftToSessionStorage,
+} from "@/components/custom-form/session-storage";
 
 export default function CustomerForm() {
   const [formData, setFormData] = useState<ContactFormData>(INITIAL_FORM_DATA);
@@ -35,6 +40,7 @@ export default function CustomerForm() {
   const [captchaInput, setCaptchaInput] = useState("");
   const [captchaError, setCaptchaError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDraftHydrated, setIsDraftHydrated] = useState(false);
 
   const totalFileSize = getTotalFileSize(attachedFiles);
   const fileSizeLimitError = `Total file size must not exceed ${formatFileSize(MAX_TOTAL_SIZE)}.`;
@@ -42,6 +48,28 @@ export default function CustomerForm() {
   useEffect(() => {
     setCaptchaChallenge(createCaptchaChallenge());
   }, []);
+
+  // restore the draft from session storage when the component mounts
+  useEffect(() => {
+    const restoredDraft = restoreDraftFromSessionStorage();
+    if (!restoredDraft) {
+      setIsDraftHydrated(true);
+      return;
+    }
+
+    setFormData(restoredDraft);
+    toast.success("Draft restored.", { id: "contact-form:draft-restored" });
+    setIsDraftHydrated(true);
+  }, []);
+
+  // save the draft to session storage when the form data changes
+  useEffect(() => {
+    if (!isDraftHydrated) {
+      return;
+    }
+
+    saveDraftToSessionStorage(formData);
+  }, [formData, isDraftHydrated]);
 
   function handleFieldChange<K extends keyof ContactFormData>(
     key: K,
@@ -96,6 +124,15 @@ export default function CustomerForm() {
       setIsSubmitting(true);
       await submitContactFormSimulation({ formData, attachedFiles });
       toast.success("Message successfully delivered");
+      // Clear session storage after successful submission
+      clearDraftFromSessionStorage();
+      
+      setFormData(INITIAL_FORM_DATA);
+      setFormErrors({});
+
+      setAttachedFiles([]);
+      setFileUploadError(null);
+
       setCaptchaChallenge(createCaptchaChallenge());
       setCaptchaInput("");
       setCaptchaError(null);
