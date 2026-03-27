@@ -1,4 +1,4 @@
-import { ContactFormData } from "@/components/custom-form/types";
+import { ContactFormData } from "@/components/contact-form/contact-form-model";
 
 const DRAFT_SESSION_KEY = "contact-form:draft";
 
@@ -23,7 +23,7 @@ export function restoreDraftFromSessionStorage(): ContactFormData | null {
 }
 
 export function saveDraftToSessionStorage(formData: ContactFormData) {
-	// if the draft is empty, remove it from session storage
+  // if the draft is empty, remove it from session storage
   const isDraftEmpty =
     formData.name.trim() === "" &&
     formData.email.trim() === "" &&

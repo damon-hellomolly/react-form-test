@@ -1,4 +1,4 @@
-import { AttachedFile } from "@/components/custom-form/types";
+import { AttachedFile } from "@/components/contact-form/contact-form-model";
 
 export const MAX_TOTAL_SIZE = 25 * 1024 * 1024;
 

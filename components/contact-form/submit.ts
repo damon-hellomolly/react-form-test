@@ -2,7 +2,7 @@ import {
   AttachedFile,
   ContactFormData,
   SubmissionResult,
-} from "@/components/custom-form/types";
+} from "@/components/contact-form/contact-form-model";
 
 const SUBMISSION_DELAY_MS = 2000;
 const LAST_SUBMISSION_SESSION_KEY = "contact-form:last-submission";

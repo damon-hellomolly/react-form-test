@@ -12,39 +12,19 @@ import {
   Send,
 } from "lucide-react";
 
-import CustomerForm from "@/components/custom-form";
+//import CustomerForm from '@/components/custom-form'
+import { ContactFormDialog } from "@/components/contact-form";
 export default function DeveloperTest() {
   const [isContactDialogOpen, setIsContactDialogOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-linear-to-br from-primary/5 via-background to-accent/5">
       {/**dialog for the contact us form */}
-      {isContactDialogOpen ? (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          onClick={() => setIsContactDialogOpen(false)}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Contact us form dialog"
-            className="w-full max-w-3xl rounded-xl border bg-background p-4 shadow-lg"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Contact Us Form</h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsContactDialogOpen(false)}
-              >
-                Close
-              </Button>
-            </div>
-            <CustomerForm />
-          </div>
-        </div>
-      ) : null}
+      {/* <CustomerForm /> */}
+      <ContactFormDialog
+        open={isContactDialogOpen}
+        onOpenChange={setIsContactDialogOpen}
+      />
 
       {/* Header */}
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
