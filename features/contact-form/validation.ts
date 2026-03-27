@@ -1,4 +1,4 @@
-import { ContactFormData, ContactFormErrors } from "@/features/custom-form/types";
+import { ContactFormData, ContactFormErrors } from "@/features/contact-form/types";
 
 export const INITIAL_FORM_DATA: ContactFormData = {
   name: "",

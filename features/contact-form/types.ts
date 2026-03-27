@@ -13,6 +13,20 @@ export interface AttachedFile {
   type: string;
 }
 
+export interface SubmittedAttachment {
+  name: string;
+  size: number;
+  type: string;
+}
+
+export interface SubmissionResult {
+  id: string;
+  submittedAt: string;
+  formData: ContactFormData;
+  attachments: SubmittedAttachment[];
+  totalAttachmentSize: number;
+}
+
 export type ContactFormErrors = Partial<Record<keyof ContactFormData, string>>;
 
 export type FileUploadError = string | null;

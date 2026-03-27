@@ -1,8 +1,7 @@
-import { AttachedFile } from "@/features/custom-form/types";
+import { AttachedFile } from "@/features/contact-form/types";
 
 export const MAX_TOTAL_SIZE = 25 * 1024 * 1024;
 
-// format the file size
 export function formatFileSize(sizeInBytes: number): string {
   if (sizeInBytes < 1024 * 1024) {
     return `${(sizeInBytes / 1024).toFixed(1)} KB`;
@@ -11,7 +10,6 @@ export function formatFileSize(sizeInBytes: number): string {
   return `${(sizeInBytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-// get the total file size
 export function getTotalFileSize(files: AttachedFile[]): number {
   return files.reduce((sum, current) => sum + current.size, 0);
 }

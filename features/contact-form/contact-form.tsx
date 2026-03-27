@@ -1,29 +1,31 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useState } from "react";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   createCaptchaChallenge,
   validateCaptchaInput,
-} from "@/features/custom-form/captcha";
+} from "@/features/contact-form/captcha";
 import {
   createAttachedFiles,
   formatFileSize,
   getTotalFileSize,
   MAX_TOTAL_SIZE,
-} from "@/features/custom-form/file-upload";
+} from "@/features/contact-form/file-upload";
 import {
   AttachedFile,
   ContactFormData,
   ContactFormErrors,
   FileUploadError,
-} from "@/features/custom-form/types";
+} from "@/features/contact-form/types";
 import {
   INITIAL_FORM_DATA,
   validateContactForm,
-} from "@/features/custom-form/validation";
+} from "@/features/contact-form/validation";
+import { submitContactFormSimulation } from "@/features/contact-form/submit";
 
-export default function CustomerForm() {
+export default function ContactForm() {
   const [formData, setFormData] = useState<ContactFormData>(INITIAL_FORM_DATA);
   const [formErrors, setFormErrors] = useState<ContactFormErrors>({});
 
@@ -35,6 +37,8 @@ export default function CustomerForm() {
   );
   const [captchaInput, setCaptchaInput] = useState("");
   const [captchaError, setCaptchaError] = useState<string | null>(null);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const totalFileSize = getTotalFileSize(attachedFiles);
   const fileSizeLimitError = `Total file size must not exceed ${formatFileSize(MAX_TOTAL_SIZE)}.`;
@@ -56,22 +60,21 @@ export default function CustomerForm() {
     });
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    // prevent the default form submission behavior
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    // validate the form data
+    if (isSubmitting) {
+      return;
+    }
+
     const errors = validateContactForm(formData);
-    // validate the file upload
     const nextFileUploadError =
       totalFileSize > MAX_TOTAL_SIZE ? fileSizeLimitError : null;
-    // validate the Captcha
     const nextCaptchaError = validateCaptchaInput(
       captchaInput,
       captchaChallenge.answer,
     );
 
-    // set errors, show errors
     setFormErrors(errors);
     setFileUploadError(nextFileUploadError);
     setCaptchaError(nextCaptchaError);
@@ -83,7 +86,22 @@ export default function CustomerForm() {
     ) {
       return;
     }
-    // submit here.
+
+    try {
+      setIsSubmitting(true);
+      await submitContactFormSimulation({
+        formData,
+        attachedFiles,
+      });
+      toast.success("Message successfully delivered");
+      setCaptchaChallenge(createCaptchaChallenge());
+      setCaptchaInput("");
+      setCaptchaError(null);
+    } catch {
+      toast.error("Submission failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   function handleFilesChange(event: ChangeEvent<HTMLInputElement>) {
@@ -104,9 +122,6 @@ export default function CustomerForm() {
 
     setAttachedFiles((prev) => [...prev, ...nextFiles]);
     setFileUploadError(null);
-
-    // let onChange event handler to be called again
-    // reset the file input, allow user to upload the same files again.
     event.target.value = "";
   }
 
@@ -132,7 +147,7 @@ export default function CustomerForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Customer Form</CardTitle>
+        <CardTitle>Contact Form</CardTitle>
       </CardHeader>
       <CardContent>
         <form noValidate className="space-y-4" onSubmit={handleSubmit}>
@@ -303,8 +318,12 @@ export default function CustomerForm() {
             ) : null}
           </div>
 
-          <button type="submit" className="rounded border px-3 py-2">
-            Submit
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="rounded border px-3 py-2 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSubmitting ? "Submitting..." : "Submit"}
           </button>
         </form>
       </CardContent>
