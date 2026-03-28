@@ -399,7 +399,7 @@ export default function ContactForm({
               fileUploadError ? "attachments-error" : undefined
             }
             onChange={handleFilesChange}
-            className="w-full rounded border px-3 py-2 text-sm file:mr-3 file:rounded file:border-0 file:bg-gray-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200"
+            className="w-min rounded border px-4 py-2 text-sm text-transparent hover:cursor-pointer file:text-sm file:font-medium file:text-gray-700 hover:bg-gray-200"
           />
           <p id="attachments-help" className="text-sm text-gray-600">
             Choose one or more files. Combined size limit is{" "}
@@ -443,9 +443,7 @@ export default function ContactForm({
                 </li>
               ))}
             </ul>
-          ) : (
-            <p className="text-sm text-gray-600">No files selected.</p>
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -481,7 +479,8 @@ export default function ContactForm({
               onClick={handleCaptchaRefresh}
               className="shrink-0 rounded border px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60 hover:bg-gray-200 hover:cursor-pointer"
             >
-              Solve: {captchaChallenge ? captchaChallenge.question : "Loading..."}
+              Solve:{" "}
+              {captchaChallenge ? captchaChallenge.question : "Loading..."}
             </button>
           </div>
           {captchaError ? (
