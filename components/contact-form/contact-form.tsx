@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   CaptchaChallenge,
@@ -37,6 +37,13 @@ export default function ContactForm({
   hideSubmitButton = false,
   onSubmittingChange,
 }: ContactFormProps) {
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const subjectInputRef = useRef<HTMLInputElement>(null);
+  const messageInputRef = useRef<HTMLTextAreaElement>(null);
+  const attachmentsInputRef = useRef<HTMLInputElement>(null);
+  const captchaInputRef = useRef<HTMLInputElement>(null);
+
   const [formData, setFormData] = useState<ContactFormData>(INITIAL_FORM_DATA);
   const [formErrors, setFormErrors] = useState<ContactFormErrors>({});
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
@@ -98,6 +105,37 @@ export default function ContactForm({
     });
   }
 
+  // focus the first invalid field when the form is submitted
+  function focusFirstInvalidField(
+    errors: ContactFormErrors,
+    nextFileUploadError: FileUploadError,
+    nextCaptchaError: string | null,
+  ) {
+    if (errors.name) {
+      nameInputRef.current?.focus();
+      return;
+    }
+    if (errors.email) {
+      emailInputRef.current?.focus();
+      return;
+    }
+    if (errors.subject) {
+      subjectInputRef.current?.focus();
+      return;
+    }
+    if (errors.message) {
+      messageInputRef.current?.focus();
+      return;
+    }
+    if (nextFileUploadError) {
+      attachmentsInputRef.current?.focus();
+      return;
+    }
+    if (nextCaptchaError) {
+      captchaInputRef.current?.focus();
+    }
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -127,6 +165,7 @@ export default function ContactForm({
       nextFileUploadError ||
       nextCaptchaError
     ) {
+      focusFirstInvalidField(errors, nextFileUploadError, nextCaptchaError);
       return;
     }
 
@@ -207,6 +246,7 @@ export default function ContactForm({
         </label>
         <div className="min-w-0 space-y-1">
           <input
+            ref={nameInputRef}
             id="name"
             name="name"
             type="text"
@@ -239,6 +279,7 @@ export default function ContactForm({
         </label>
         <div className="min-w-0 space-y-1">
           <input
+            ref={emailInputRef}
             id="email"
             name="email"
             type="email"
@@ -271,6 +312,7 @@ export default function ContactForm({
         </label>
         <div className="min-w-0 space-y-1">
           <input
+            ref={subjectInputRef}
             id="subject"
             name="subject"
             type="text"
@@ -305,6 +347,7 @@ export default function ContactForm({
         </label>
         <div className="min-w-0 space-y-1">
           <textarea
+            ref={messageInputRef}
             id="message"
             name="message"
             rows={3}
@@ -339,19 +382,29 @@ export default function ContactForm({
         </label>
         <div className="min-w-0 space-y-2">
           <input
+            ref={attachmentsInputRef}
             id="attachments"
             name="attachments"
             type="file"
             multiple
             disabled={isSubmitting}
             aria-invalid={fileUploadError ? true : undefined}
-            aria-describedby={fileUploadError ? "attachments-error" : undefined}
+            aria-label="Attach files"
+            aria-describedby={
+              fileUploadError
+                ? "attachments-help attachments-error"
+                : "attachments-help"
+            }
             aria-errormessage={
               fileUploadError ? "attachments-error" : undefined
             }
             onChange={handleFilesChange}
-            className="w-full rounded border px-4 py-2 text-sm text-transparent file:text-sm file:font-medium file:text-gray-700 hover:bg-gray-200"
+            className="w-full rounded border px-3 py-2 text-sm file:mr-3 file:rounded file:border-0 file:bg-gray-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200"
           />
+          <p id="attachments-help" className="text-sm text-gray-600">
+            Choose one or more files. Combined size limit is{" "}
+            {formatFileSize(MAX_TOTAL_SIZE)}.
+          </p>
           <p className="text-sm text-gray-600">
             Total size: {formatFileSize(totalFileSize)} /{" "}
             {formatFileSize(MAX_TOTAL_SIZE)}
@@ -390,7 +443,9 @@ export default function ContactForm({
                 </li>
               ))}
             </ul>
-          ) : null}
+          ) : (
+            <p className="text-sm text-gray-600">No files selected.</p>
+          )}
         </div>
       </div>
 
@@ -401,6 +456,7 @@ export default function ContactForm({
         <div className="min-w-0 space-y-2">
           <div className="flex items-start gap-2">
             <input
+              ref={captchaInputRef}
               id="captcha"
               name="captcha"
               type="text"
