@@ -1,5 +1,6 @@
 "use client";
 
+import { ContactUsForm } from "@/components/contact-us-form";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -30,10 +31,12 @@ export default function DeveloperTest() {
               </p>
             </div>
             {/**this button could open the contact us form in a dialog */}
-            <Button variant="outline" size="lg" className="gap-2">
-              <FileText className="h-5 w-5" />
-              Contact Us Form
-            </Button>
+            <ContactUsForm>
+              <Button variant="outline" size="lg" className="gap-2">
+                <FileText className="h-5 w-5" />
+                Contact Us Form
+              </Button>
+            </ContactUsForm>
           </div>
         </div>
       </header>
@@ -314,7 +317,8 @@ export default function DeveloperTest() {
               <li className="flex items-start gap-2">
                 <span className="text-primary">1.</span>
                 <span>
-                  Create a new branch from the main branch and name it according to your name or github username.
+                  Create a new branch from the main branch and name it according
+                  to your name or github username.
                 </span>
               </li>
               <li className="flex items-start gap-2">
