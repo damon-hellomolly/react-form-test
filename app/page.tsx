@@ -1,23 +1,13 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  FileText,
-  CheckCircle2,
-  Shield,
-  Save,
-  Upload,
-  Send,
-} from "lucide-react";
+import { CheckCircle2, Shield, Save, Upload, Send } from "lucide-react";
 
-//import CustomerForm from '@/components/custom-form'
+import CustomerForm from "@/components/custom-form";
+
 export default function DeveloperTest() {
   return (
     <div className="min-h-screen bg-linear-to-br from-primary/5 via-background to-accent/5">
-      {/**dialog for the contact us form */}
-      {/* <CustomerForm /> */}
-      {/* Header */}
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
@@ -29,11 +19,7 @@ export default function DeveloperTest() {
                 Technical Assessment Challenge
               </p>
             </div>
-            {/**this button could open the contact us form in a dialog */}
-            <Button variant="outline" size="lg" className="gap-2">
-              <FileText className="h-5 w-5" />
-              Contact Us Form
-            </Button>
+            <CustomerForm />
           </div>
         </div>
       </header>
